@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Addicted Game Tracker – Dashboard Proposal</title>
+  <!--
+    This mock‑up demonstrates a possible layout for an Addicted game
+    dashboard. It does not call any external APIs; instead, it
+    illustrates how your data could be organised into a cohesive UI.
+
+    The dark theme echoes the visual style of the official game,
+    while clearly delineated sections make it easy to follow your
+    progress. Chart.js is used for simple demonstration charts.
+  -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-dark: #0f0f14;
+      --bg-panel: #17171c;
+      --text-main: #f4f4f4;
+      --text-secondary: #a0a0a0;
+      --accent: #8b5cf6;
+      --card-radius: 12px;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.5;
+    }
+
+    header {
+      padding: 2rem 1rem;
+      text-align: center;
+      background: linear-gradient(90deg, #7928ca, #ff0080);
+      color: white;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Stats row at top */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background-color: var(--bg-panel);
+      border-radius: var(--card-radius);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .stat-card h3 {
+      margin: 0 0 0.25rem;
+      font-size: 1.2rem;
+      color: var(--accent);
+    }
+
+    .stat-card p {
+      margin: 0;
+      font-size: 1.6rem;
+      font-weight: 600;
+    }
+
+    /* Strain collection */
+    .strain-section {
+      margin-bottom: 2rem;
+    }
+
+    .strain-section h2 {
+      margin-bottom: 1rem;
+    }
+
+    .strain-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .strain-card {
+      background-color: var(--bg-panel);
+      border-radius: var(--card-radius);
+      overflow: hidden;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .strain-card .card-header {
+      padding: 0.5rem 1rem;
+      font-weight: 600;
+    }
+
+    .strain-card .card-image {
+      height: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 3rem;
+      color: var(--text-secondary);
+    }
+
+    .strain-card .card-body {
+      padding: 1rem;
+      text-align: center;
+    }
+
+    .strain-card .rarity {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .strain-card .grow-power {
+      font-size: 1.1rem;
+      margin: 0.25rem 0;
+      font-weight: 500;
+    }
+
+    .strain-card .count {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    /* Chart area */
+    .chart-section {
+      margin-bottom: 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .chart-card {
+      background-color: var(--bg-panel);
+      border-radius: var(--card-radius);
+      padding: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .chart-card h3 {
+      margin: 0 0 1rem;
+    }
+
+    /* Table */
+    .table-section h3 {
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+
+    th {
+      background-color: var(--bg-panel);
+    }
+
+    tr:nth-child(even) {
+      background-color: #141419;
+    }
+
+    tr:hover {
+      background-color: #1e1e26;
+    }
+
+    /* AI analysis */
+    .analysis-section {
+      margin-top: 2rem;
+      background-color: var(--bg-panel);
+      border-radius: var(--card-radius);
+      padding: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .analysis-section h3 {
+      margin-top: 0;
+    }
+
+    .analysis-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .analysis-table th,
+    .analysis-table td {
+      padding: 0.5rem 0.75rem;
+      text-align: center;
+    }
+
+    .analysis-table th {
+      background-color: var(--bg-panel);
+    }
+
+    /* Sorting arrow icons in seed snapshot table */
+    .sort-icons {
+      display: inline-flex;
+      flex-direction: column;
+      margin-left: 0.25rem;
+      font-size: 0.65rem;
+      line-height: 0.65rem;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Addicted Game Tracker Dashboard</h1>
+    <!-- Wallet address input -->
+    <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.5rem; align-items: center;">
+      <input type="text" id="wallet-address" placeholder="Enter your Solana address" style="padding: 0.5rem 1rem; border-radius: var(--card-radius); border: none; width: 300px; max-width: 80%;">
+      <button style="padding: 0.5rem 1rem; border: none; border-radius: var(--card-radius); background-color: var(--accent); color: white; cursor: pointer;">
+        Search
+      </button>
+    </div>
+  </header>
+  <main>
+    <!-- High level stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h3>$WEED price (USD)</h3>
+        <p id="weed-price">$0.00</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total packs opened</h3>
+        <p id="packs-opened">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Your Grow Power</h3>
+        <p id="your-grow-power">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>$WEED mined today</h3>
+        <p id="weed-mined">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Total Supply</h3>
+        <!-- Total supply is fixed at 240 million tokens【971628485730126†L84-L88】 -->
+        <p id="total-supply">240M</p>
+      </div>
+      <div class="stat-card">
+        <h3>Current Supply</h3>
+        <p id="current-supply">0</p>
+      </div>
+    </div>
+
+    <!-- Strain Collection -->
+    <section class="strain-section">
+      <h2>Strain Collection</h2>
+      <p class="text-muted" style="color: var(--text-secondary); margin-top: -0.5rem; margin-bottom: 1rem;">
+        Track how many of each seed you own. Rarer strains yield more Grow Power and therefore
+        more $WEED.
+      </p>
+      <div class="strain-grid">
+        <!-- Example cards for each strain. Replace placeholder values with real counts. -->
+        <div class="strain-card" style="border-top: 4px solid #f97316;">
+          <div class="card-header">OG Kush</div>
+          <div class="card-image">
+            <img src="og_kush.webp" alt="OG Kush" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Common</div>
+            <div class="grow-power">Grow power: 100</div>
+            <div class="count" id="count-og">x0</div>
+          </div>
+        </div>
+        <div class="strain-card" style="border-top: 4px solid #3b82f6;">
+          <div class="card-header">Blue Dream</div>
+          <div class="card-image">
+            <img src="blue_dream.webp" alt="Blue Dream" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Common</div>
+            <div class="grow-power">Grow power: 180</div>
+            <div class="count" id="count-blue">x0</div>
+          </div>
+        </div>
+        <div class="strain-card" style="border-top: 4px solid #84cc16;">
+          <div class="card-header">Sour Diesel</div>
+          <div class="card-image">
+            <img src="sour_diesel.webp" alt="Sour Diesel" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Rare</div>
+            <div class="grow-power">Grow power: 300</div>
+            <div class="count" id="count-sour">x0</div>
+          </div>
+        </div>
+        <div class="strain-card" style="border-top: 4px solid #a855f7;">
+          <div class="card-header">Girl Scout Cookies</div>
+          <div class="card-image">
+            <img src="girl_scout_cookies.webp" alt="Girl Scout Cookies" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Rare</div>
+            <div class="grow-power">Grow power: 420</div>
+            <div class="count" id="count-gsc">x0</div>
+          </div>
+        </div>
+        <div class="strain-card" style="border-top: 4px solid #10b981;">
+          <div class="card-header">Gorilla Glue</div>
+          <div class="card-image">
+            <img src="gorilla_glue.webp" alt="Gorilla Glue" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Super Rare</div>
+            <div class="grow-power">Grow power: 1,000</div>
+            <div class="count" id="count-gorilla">x0</div>
+          </div>
+        </div>
+        <div class="strain-card" style="border-top: 4px solid #ec4899;">
+          <div class="card-header">Unicorn Poop</div>
+          <div class="card-image">
+            <img src="unicorn_poop.webp" alt="Unicorn Poop" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Super Rare</div>
+            <div class="grow-power">Grow power: 5,000</div>
+            <div class="count" id="count-unicorn">x0</div>
+          </div>
+        </div>
+        <div class="strain-card" style="border-top: 4px solid #7c3aed;">
+          <div class="card-header">Granddaddy Purple</div>
+          <div class="card-image">
+            <img src="granddaddy_purple.webp" alt="Granddaddy Purple" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Ultra Rare</div>
+            <div class="grow-power">Grow power: 15,000</div>
+            <div class="count" id="count-granddaddy">x0</div>
+          </div>
+        </div>
+        <div class="strain-card" style="border-top: 4px solid #facc15;">
+          <div class="card-header">Super Lemon Haze</div>
+          <div class="card-image">
+            <img src="super_lemon_haze.webp" alt="Super Lemon Haze" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Ultra Rare</div>
+            <div class="grow-power">Grow power: 30,000</div>
+            <div class="count" id="count-lemon">x0</div>
+          </div>
+        </div>
+        <div class="strain-card" style="border-top: 4px solid #ef4444;">
+          <div class="card-header">Godfather OG</div>
+          <div class="card-image">
+            <img src="godfather_og.webp" alt="Godfather OG" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <div class="card-body">
+            <div class="rarity">Legendary</div>
+            <div class="grow-power">Grow power: 300,000</div>
+            <div class="count" id="count-godfather">x0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Charts -->
+    <section class="chart-section">
+      <div class="chart-card">
+        <h3>$WEED Farming Rewards</h3>
+        <canvas id="weedRewardsChart" width="400" height="250"></canvas>
+      </div>
+      <div class="chart-card">
+        <div style="display: flex; justify-content: space-between; align-items: baseline;">
+          <h3>Seed Pack Distribution</h3>
+          <span style="color: var(--text-secondary); font-size: 0.9rem;">Total Packs: <span id="total-packs">0</span></span>
+        </div>
+        <canvas id="seedDistributionChart" width="400" height="250"></canvas>
+      </div>
+      <!-- Current supply time‑series chart -->
+      <div class="chart-card">
+        <h3>Current $WEED Supply</h3>
+        <canvas id="currentSupplyChart" width="400" height="250"></canvas>
+      </div>
+      <!-- Mint vs Burn chart -->
+      <div class="chart-card">
+        <h3>$WEED Mint vs Burn</h3>
+        <canvas id="mintBurnChart" width="400" height="250"></canvas>
+      </div>
+    </section>
+
+    <!-- Snapshot Table -->
+    <section class="table-section">
+      <h3>Latest Seed Snapshot</h3>
+      <p style="color: var(--text-secondary); margin-top: -0.5rem;">
+        This table lists the most recent seeds pulled from the blockchain. Each
+        seed has a unique ID which maps back to a strain in your collection.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th style="cursor: pointer;">
+              Seed #
+              <span class="sort-icons">
+                <span>▲</span>
+                <span>▼</span>
+              </span>
+            </th>
+            <th>Strain</th>
+            <th>Rarity</th>
+          </tr>
+        </thead>
+        <tbody id="snapshotTableBody">
+          <!-- Rows will be injected here dynamically -->
+          <tr>
+            <td>79424</td>
+            <td>Sour Diesel</td>
+            <td>Rare</td>
+          </tr>
+          <tr>
+            <td>79426</td>
+            <td>Gorilla Glue</td>
+            <td>Super Rare</td>
+          </tr>
+          <tr>
+            <td>79427</td>
+            <td>Godfather OG</td>
+            <td>Legendary</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- AI analysis section -->
+    <section class="analysis-section">
+      <h3>Strategy & ROI Analysis</h3>
+      <p style="color: var(--text-secondary);">
+        Use this high‑level analysis to decide which strategy offers the best
+        return on investment. The "Expected Yield" column estimates the
+        $WEED you might earn per day per seed type. "ROI" compares the
+        expected earnings to the cost of acquiring the seed (in $WEED).
+      </p>
+      <table class="analysis-table">
+        <thead>
+          <tr>
+            <th>Strain</th>
+            <th>Grow Power</th>
+            <th>Pack Cost ($WEED)</th>
+            <th>Expected Daily Yield ($WEED)</th>
+            <th>ROI (days)</th>
+          </tr>
+        </thead>
+        <tbody id="analysisBody">
+          <!-- Example analysis; replace with actual calculations -->
+          <tr>
+            <td>OG Kush</td>
+            <td>100</td>
+            <td>300</td>
+            <td>1.5</td>
+            <td>200</td>
+          </tr>
+          <tr>
+            <td>Gorilla Glue</td>
+            <td>1,000</td>
+            <td>300</td>
+            <td>15</td>
+            <td>20</td>
+          </tr>
+          <tr>
+            <td>Godfather OG</td>
+            <td>300,000</td>
+            <td>300</td>
+            <td>4,500</td>
+            <td>0.07</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <!-- JavaScript to initialise charts with dummy data -->
+  <script>
+    // Placeholder data for the WEED rewards line chart (supports large values)
+    const rewardsCtx = document.getElementById('weedRewardsChart').getContext('2d');
+    const weedRewardsChart = new Chart(rewardsCtx, {
+      type: 'line',
+      data: {
+        labels: ['12:00', '12:15', '12:30', '12:45', '13:00', '13:15'],
+        datasets: [
+          {
+            label: '$WEED per block',
+            // Example values demonstrating a potential peak near 50k
+            data: [25000, 30000, 40000, 35000, 32000, 28000],
+            borderColor: 'rgba(139, 92, 246, 1)',
+            tension: 0.4,
+            borderWidth: 2,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#a0a0a0' },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          },
+          y: {
+            ticks: { color: '#a0a0a0' },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            min: 0,
+            max: 50000
+          }
+        }
+      }
+    });
+
+    // Placeholder data for the seed distribution bar chart
+    const distributionCtx = document.getElementById('seedDistributionChart').getContext('2d');
+    const seedLabels = ['OG Kush', 'Blue Dream', 'Sour Diesel', 'GSC', 'Gorilla Glue', 'Unicorn Poop', 'GDP', 'Lemon Haze', 'Godfather'];
+    const seedCounts = [450, 420, 480, 500, 350, 420, 470, 390, 500];
+    const distributionChart = new Chart(distributionCtx, {
+      type: 'bar',
+      data: {
+        labels: seedLabels,
+        datasets: [
+          {
+            label: 'Seeds Pulled',
+            data: seedCounts,
+            backgroundColor: 'rgba(16, 185, 129, 0.7)',
+            borderColor: 'rgba(16, 185, 129, 1)',
+            borderWidth: 1
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: function(context) {
+                return seedLabels[context[0].dataIndex];
+              },
+              label: function(context) {
+                return 'Seeds Pulled: ' + seedCounts[context.dataIndex];
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#a0a0a0', maxRotation: 90, minRotation: 45 },
+            grid: { display: false }
+          },
+          y: {
+            ticks: { color: '#a0a0a0' },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          }
+        }
+      }
+    });
+
+    // Update total packs count in the bar chart header
+    const totalPacksElement = document.getElementById('total-packs');
+    if (totalPacksElement) {
+      const total = seedCounts.reduce((a, b) => a + b, 0);
+      totalPacksElement.textContent = total;
+    }
+
+    // Current supply chart (time series)
+    const supplyCtx = document.getElementById('currentSupplyChart').getContext('2d');
+    // Example labels reused; in real use these would correspond to block times or timestamps
+    const supplyLabels = ['12:00', '12:15', '12:30', '12:45', '13:00', '13:15'];
+    // Example current supply values in millions (decreasing/increasing pattern)
+    const supplyValues = [238, 237.8, 237.5, 237.3, 237.1, 236.9];
+    const currentSupplyChart = new Chart(supplyCtx, {
+      type: 'line',
+      data: {
+        labels: supplyLabels,
+        datasets: [
+          {
+            label: 'Current Supply (M)',
+            data: supplyValues,
+            borderColor: 'rgba(236, 72, 153, 1)',
+            tension: 0.4,
+            borderWidth: 2,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#a0a0a0' },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          },
+          y: {
+            ticks: { color: '#a0a0a0' },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            min: 0,
+            max: 240
+          }
+        }
+      }
+    });
+
+    // Update current supply statistic based on last value of supplyValues array
+    const currentSupplyElem = document.getElementById('current-supply');
+    if (currentSupplyElem) {
+      const latestSupply = supplyValues[supplyValues.length - 1];
+      currentSupplyElem.textContent = latestSupply + 'M';
+    }
+
+    // Mint vs Burn chart
+    const mintBurnCtx = document.getElementById('mintBurnChart').getContext('2d');
+    // Example time labels; reuse times to keep charts aligned
+    const mbLabels = ['12:00', '12:15', '12:30', '12:45', '13:00', '13:15'];
+    // Example mint and burn values (in thousands of $WEED tokens)
+    const mintValues = [10, 15, 12, 18, 16, 14];
+    const burnValues = [5, 8, 9, 7, 6, 7.5];
+    new Chart(mintBurnCtx, {
+      type: 'line',
+      data: {
+        labels: mbLabels,
+        datasets: [
+          {
+            label: 'Mint (k)',
+            data: mintValues,
+            borderColor: 'rgba(251, 191, 36, 1)',
+            backgroundColor: 'rgba(251, 191, 36, 0.4)',
+            tension: 0.4,
+            borderWidth: 2,
+            fill: false
+          },
+          {
+            label: 'Burn (k)',
+            data: burnValues,
+            borderColor: 'rgba(52, 211, 153, 1)',
+            backgroundColor: 'rgba(52, 211, 153, 0.4)',
+            tension: 0.4,
+            borderWidth: 2,
+            fill: false
+          }
+        ]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: true,
+            labels: { color: '#a0a0a0' }
+          }
+        },
+        scales: {
+          x: {
+            ticks: { color: '#a0a0a0' },
+            grid: { color: 'rgba(255,255,255,0.05)' }
+          },
+          y: {
+            ticks: { color: '#a0a0a0' },
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            min: 0,
+            max: 20
+          }
+        }
+      }
+    });
+  </script>
+</body>
+</html>
