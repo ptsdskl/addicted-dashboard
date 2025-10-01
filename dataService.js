@@ -26,7 +26,7 @@ const WEED_MINT_ADDRESS = 'E2gLkTXSbbTMmJM19xkquawun2ShJSi7G59A8c2PtbFa';
 async function getWeedPrice() {
   try {
     const res = await fetch(
-      `https://price.jup.ag/v4/price?ids=${WEED_MINT_ADDRESS}` // https://jup.ag/tokens/E2gLkTXSbbTMmJM19xkquawun2ShJSi7G59A8c2PtbFa
+      `https://lite-api.jup.ag/price/v3?ids=${WEED_MINT_ADDRESS}` // https://jup.ag/tokens/E2gLkTXSbbTMmJM19xkquawun2ShJSi7G59A8c2PtbFa
     );
     const data = await res.json();
     const priceInfo = data?.data?.[WEED_MINT_ADDRESS]; 
